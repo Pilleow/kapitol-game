@@ -48,8 +48,8 @@ public class KapitolGame extends ApplicationAdapter {
 
     public void updateGameElements(float deltaTime) {
         if (!map.isGenerated()) {
-            map.generateMap(8);
-            items.generateItems(5, map);
+            map.generateMap(12);
+            items.generateItems(10, map);
             // map.printMapToConsole();
             mainPlayer.rect.setPosition(map.getEntranceCenter());
         }
@@ -62,6 +62,7 @@ public class KapitolGame extends ApplicationAdapter {
         mainPlayer.applyVelocity(deltaTime);
 
         if (mainPlayer.clickedPickupButton()) mainPlayer.handleItemPickup(items);
+        if (mainPlayer.clickedDropButton()) mainPlayer.handleItemDrop();
 
         Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
         mainCamera.unproject(mousePos);

@@ -61,9 +61,17 @@ public class Player extends GameActor {
         inventory.handleItemPickup(items, new Vector2(rect.x, rect.y));
     }
 
+    public void handleItemDrop() {
+        inventory.handleItemDrop(rect);
+    }
+
     // Getters, setters ------------------------------------------------------------------------------------------------
 
     public boolean clickedPickupButton() {
         return Gdx.input.isKeyJustPressed(Input.Keys.E);
+    }
+
+    public boolean clickedDropButton() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.Q);
     }
 }
