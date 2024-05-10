@@ -3,13 +3,20 @@ package com.kapitolgamers.classes.actors;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import com.kapitolgamers.classes.items.Inventory;
+import com.kapitolgamers.classes.items.Item;
+import com.kapitolgamers.classes.items.ItemManager;
+
 
 public class Player extends GameActor {
 
+    public Inventory inventory;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public Player(String spriteRelativePath, float x, float y) {
-        super(spriteRelativePath, x, y);
+    public Player(String spriteRelativePath, float x, float y, float width, float height) {
+        super(spriteRelativePath, x, y, width, height);
+        inventory = new Inventory(4);
     }
 
     // Public methods --------------------------------------------------------------------------------------------------
@@ -50,5 +57,13 @@ public class Player extends GameActor {
         setAngleDeg((float) Math.toDegrees(angleRad));
     }
 
+    public void handleItemPickup(ItemManager items) {
+        inventory.handleItemPickup(items, new Vector2(rect.x, rect.y));
+    }
+
     // Getters, setters ------------------------------------------------------------------------------------------------
+
+    public boolean clickedPickupButton() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.E);
+    }
 }
