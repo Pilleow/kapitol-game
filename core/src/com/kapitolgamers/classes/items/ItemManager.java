@@ -7,14 +7,17 @@ import com.kapitolgamers.classes.structures.MapManager;
 import com.kapitolgamers.classes.structures.Room;
 import com.kapitolgamers.classes.util.RandomHandler;
 
-import java.nio.file.attribute.UserPrincipal;
+import java.io.Serializable;
 import java.util.Vector;
 
 public class ItemManager {
 
+    public record ItemData(Rectangle rect, int weight, int value, String spritePath, boolean isHidden) implements Serializable {}
     private Item[] items;
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public ItemManager() {}
 
     // Public methods --------------------------------------------------------------------------------------------------
 
@@ -50,7 +53,9 @@ public class ItemManager {
 
     public void render(SpriteBatch batch, Camera cam) {
         // todo - add chunk based rendering such that not all items are rendered at all times, only those visible.
-        for (Item item : items) if (!item.isHidden) item.draw(batch);
+        for (Item item : items) {
+            if (!item.isHidden) item.draw(batch);
+        }
     }
 
     public void dispose() {
@@ -61,5 +66,25 @@ public class ItemManager {
 
     public Item[] getItems() {
         return items;
+    }
+
+    public ItemData[] getItemsData() {
+        ItemData[] out = new ItemData[items.length];
+        for (int i = 0; i < items.length; ++i) {
+            Item it = items[i];
+            out[i] = new ItemData(it.rect, it.getWeight(), it.getValue(), it.getSpritePath(), it.isHidden);
+        }
+        return out;
+    }
+
+    public void createItemsFromData(ItemData[] newItems) {
+        items = new Item[newItems.length];
+        for (int i = 0; i < newItems.length; ++i) {
+            ItemData itd = newItems[i];
+            items[i] = new Item(
+                    (int) itd.rect.x, (int) itd.rect.y, (int) itd.rect.width,
+                    itd.weight, itd.value, itd.spritePath
+            );
+        }
     }
 }

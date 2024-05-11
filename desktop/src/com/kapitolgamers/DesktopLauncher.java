@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("KapitolGamers");
-		config.setWindowedMode(1280, 720);
+		config.setWindowedMode(640, 480);
 		config.useVsync(true);
 		new Lwjgl3Application(new GameClient(), config);
 	}

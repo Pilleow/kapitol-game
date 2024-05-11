@@ -3,9 +3,10 @@ package com.kapitolgamers.classes.structures;
 import com.badlogic.gdx.math.Rectangle;
 import com.kapitolgamers.classes.util.Direction;
 
+import java.io.Serializable;
 import java.util.Vector;
 
-public class Room {
+public class Room implements Serializable {
 
     public enum Type {
         NORMAL,

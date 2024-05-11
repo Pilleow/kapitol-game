@@ -8,22 +8,25 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kapitolgamers.classes.actors.Player;
+import com.kapitolgamers.classes.items.Item;
 import com.kapitolgamers.classes.items.ItemManager;
 import com.kapitolgamers.classes.structures.MapManager;
+import com.kapitolgamers.classes.structures.Room;
 
 import java.io.IOException;
-import java.net.ConnectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Vector;
 
 public class GameClient extends ApplicationAdapter {
-    final int[] INIT_RES = {1280, 720};
-    SpriteBatch batch;
-    MapManager map;
-    ItemManager items;
-    Player mainPlayer;
-    Vector<Player> otherPlayers = new Vector<>();
-    OrthographicCamera mainCamera;
+    private final int[] INIT_RES = {640, 480};
+    private SpriteBatch batch;
+    private MapManager map;
+    private ItemManager items;
+    private Player mainPlayer;
+    private Vector<Player> otherPlayers = new Vector<>();
+    private OrthographicCamera mainCamera;
     private GameServer gameServer;
     private Socket clientSocket;
 
@@ -42,24 +45,28 @@ public class GameClient extends ApplicationAdapter {
         mainCamera = new OrthographicCamera();
         mainCamera.setToOrtho(false, 1280, 720);
 
-        // todo- what the hell, do something with this abomination
-        boolean SERVER = false;
+        boolean isHost = false;
         String ADDRESS = "localhost";
         int PORT = 12345;
 
-        if (!ADDRESS.isEmpty()) {
+        try {
+            clientSocket = new Socket(ADDRESS, PORT);
+            System.out.println("Running as CLIENT");
+        } catch (IOException e) {
+            isHost = true;
+        }
+        if (isHost) {
+            gameServer = new GameServer();
+            gameServer.startAcceptingNewPlayerConnections();
+            gameServer.startProcessingExistingPlayerRequests();
+            System.out.println("Running as SERVER");
+
             try {
                 clientSocket = new Socket(ADDRESS, PORT);
-                System.out.println("Running as CLIENT");
+                System.out.println("CLIENT Started");
             } catch (IOException e) {
-                SERVER = true;
-                ADDRESS = "";
+                throw new RuntimeException(e);
             }
-        }
-        if (ADDRESS.isEmpty()) {
-            gameServer = new GameServer();
-            gameServer.acceptNewPlayerConnections();
-            System.out.println("Running as SERVER");
         }
     }
 
@@ -76,10 +83,12 @@ public class GameClient extends ApplicationAdapter {
 
     public void updateGameElements(float deltaTime) {
         if (!map.isGenerated()) {
-            map.generateMap(12);
-            items.generateItems(10, map);
-            // map.printMapToConsole();
+            sendStringToServer("REQUEST MAPROOMS");
+            map.loadNewMapRooms((Room[][]) getRequestedObjectFromServer());
             mainPlayer.rect.setPosition(map.getEntranceCenter());
+
+            sendStringToServer("REQUEST ITEMS");
+            items.createItemsFromData((ItemManager.ItemData[]) getRequestedObjectFromServer());
         }
 
         mainPlayer.processNewMovementInput();
@@ -97,6 +106,25 @@ public class GameClient extends ApplicationAdapter {
         mainPlayer.setRotationTowardsPosition(new Vector2(mousePos.x, mousePos.y));
         mainCamera.position.set(mainPlayer.getCenter(), 0);
 
+    }
+
+    private Object getRequestedObjectFromServer() {
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
+            return objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sendStringToServer(String message) {
+        try {
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+            objectOutputStream.writeObject(message);
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void renderGameElements() {

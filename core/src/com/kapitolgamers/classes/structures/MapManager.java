@@ -21,12 +21,12 @@ public class MapManager {
     HashMap<String, Texture> sprites;
     ShapeRenderer shapeRenderer = new ShapeRenderer();
     private Room[][] mapRooms;
-    private Vector<int[]> roomLocations;
+    private Vector<int[]> roomLocations = new Vector<>();;
     private boolean isGenerated = false;
     private int renderDistance;
 
-    // Constructors ----------------------------------------------------------------------------------------------------
 
+    // Constructors ----------------------------------------------------------------------------------------------------
     public MapManager(String roomSpriteDir) {
         loadSpritesFromDir(roomSpriteDir);
         renderDistance = 4;
@@ -48,8 +48,8 @@ public class MapManager {
         }
     }
 
-    // Public methods --------------------------------------------------------------------------------------------------
 
+    // Public methods --------------------------------------------------------------------------------------------------
     public void generateMap(int roomCount) {
         isGenerated = false;
         generateRooms(roomCount);
@@ -62,7 +62,6 @@ public class MapManager {
         roomCount = (int) Math.ceil(1.7 * Math.sqrt(roomCount));
 
         mapRooms = new Room[roomCount][roomCount];
-        roomLocations = new Vector<>();
 
         int posX = roomCount / 2;
         int posY = roomCount / 2;
@@ -225,6 +224,19 @@ public class MapManager {
         return out;
     }
 
+    public void loadNewMapRooms(Room[][] newMapRooms) {
+        mapRooms = newMapRooms;
+        roomLocations.clear();
+        for (int x = 0; x < mapRooms.length; ++x) {
+            for (int y = 0; y < mapRooms[0].length; ++y) {
+                if (mapRooms[x][y] == null) continue;
+                roomLocations.add(new int[]{x, y});
+            }
+        }
+        isGenerated = true;
+        System.out.println("newMapRooms loaded successfully.");
+    }
+
     // Getters, setters ------------------------------------------------------------------------------------------------
 
     public void setRenderDistance(int newRenderDistance) {
@@ -267,5 +279,4 @@ public class MapManager {
     public Vector<int[]> getRoomLocations() {
         return roomLocations;
     }
-
 }
