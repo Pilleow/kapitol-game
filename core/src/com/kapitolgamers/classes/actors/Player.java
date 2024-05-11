@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.kapitolgamers.classes.items.Inventory;
-import com.kapitolgamers.classes.items.Item;
 import com.kapitolgamers.classes.items.ItemManager;
 
 

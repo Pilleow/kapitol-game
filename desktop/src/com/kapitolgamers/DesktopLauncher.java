@@ -11,6 +11,6 @@ public class DesktopLauncher {
 		config.setTitle("KapitolGamers");
 		config.setWindowedMode(1280, 720);
 		config.useVsync(true);
-		new Lwjgl3Application(new KapitolGame(), config);
+		new Lwjgl3Application(new GameClient(), config);
 	}
 }

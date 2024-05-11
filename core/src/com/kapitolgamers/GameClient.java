@@ -11,13 +11,21 @@ import com.kapitolgamers.classes.actors.Player;
 import com.kapitolgamers.classes.items.ItemManager;
 import com.kapitolgamers.classes.structures.MapManager;
 
-public class KapitolGame extends ApplicationAdapter {
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.util.Vector;
+
+public class GameClient extends ApplicationAdapter {
     final int[] INIT_RES = {1280, 720};
     SpriteBatch batch;
     MapManager map;
     ItemManager items;
     Player mainPlayer;
+    Vector<Player> otherPlayers = new Vector<>();
     OrthographicCamera mainCamera;
+    private GameServer gameServer;
+    private Socket clientSocket;
 
     @Override
     public void create() {
@@ -33,6 +41,26 @@ public class KapitolGame extends ApplicationAdapter {
         );
         mainCamera = new OrthographicCamera();
         mainCamera.setToOrtho(false, 1280, 720);
+
+        // todo- what the hell, do something with this abomination
+        boolean SERVER = false;
+        String ADDRESS = "localhost";
+        int PORT = 12345;
+
+        if (!ADDRESS.isEmpty()) {
+            try {
+                clientSocket = new Socket(ADDRESS, PORT);
+                System.out.println("Running as CLIENT");
+            } catch (IOException e) {
+                SERVER = true;
+                ADDRESS = "";
+            }
+        }
+        if (ADDRESS.isEmpty()) {
+            gameServer = new GameServer();
+            gameServer.acceptNewPlayerConnections();
+            System.out.println("Running as SERVER");
+        }
     }
 
     @Override
@@ -74,6 +102,7 @@ public class KapitolGame extends ApplicationAdapter {
     private void renderGameElements() {
         map.render(batch, mainCamera);
         items.render(batch, mainCamera);
+        for (Player p : otherPlayers) p.draw(batch);
         mainPlayer.draw(batch);
         mainPlayer.inventory.render(batch, mainCamera);
     }
@@ -84,5 +113,16 @@ public class KapitolGame extends ApplicationAdapter {
         mainPlayer.dispose();
         items.dispose();
         map.dispose();
+
+        try {
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (gameServer != null) {
+            gameServer.dispose();
+        }
     }
 }
